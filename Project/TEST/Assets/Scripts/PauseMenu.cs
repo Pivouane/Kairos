@@ -1,47 +1,53 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
+using System.Collections;
+using Photon.Pun;
+using Photon.Realtime;
 
-
-public class PauseMenu : MonoBehaviour
+namespace Com.Epicure.Kairos
 {
-    public static bool gameIsPaused = false;
-    public GameObject PausedMenu;
-
-    private void Update()
+    public class PauseMenu : MonoBehaviourPunCallbacks
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        public static bool gameIsPaused = false;
+        public GameObject PausedMenu;
+
+        private void Update()
         {
-                
-            if(gameIsPaused)  // si la game est en pause on quite et on reprend le cours de la partie
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Resume();
-            }
-            else
-            {
-                Paused();
+
+                if (gameIsPaused)  // si la game est en pause on quite et on reprend le cours de la partie
+                {
+                    Resume();
+                }
+                else
+                {
+                    Paused();
+                }
             }
         }
-    }
 
-    void Paused()
-    {
-        PausedMenu.SetActive(true);
-        Time.timeScale = 0; // met le temps a 0
-        gameIsPaused = true; 
-    }
+        void Paused()
+        {
+            PausedMenu.SetActive(true);
+            Time.timeScale = 0; // met le temps a 0
+            gameIsPaused = true;
+        }
 
-    public void Resume()
-    {
-        PausedMenu.SetActive(false);
-        Time.timeScale = 1; // on remet le temps a 1 
-        gameIsPaused = false;
-    }
+        public void Resume()
+        {
+            PausedMenu.SetActive(false);
+            Time.timeScale = 1; // on remet le temps a 1 
+            gameIsPaused = false;
+        }
 
-    public void MainMenu()
-    {
-        SceneManager.LoadScene("MainMenu");
-        Resume();
+        public void MainMenu()
+        {
+            SceneManager.LoadScene("Launcher");
+            Resume();
+        }
+
     }
 
 }
-
