@@ -13,6 +13,7 @@ public class CharacterStat : MonoBehaviour
     public bool isDead = false;     // savoir si le joueur est mort
     Animation animations; // on recupere les animations 
     CharacterStat characterStat;
+    public GameObject characterMortor;
 
 
     public void ApplyDamage(int dammage) // applique des dégat au player
@@ -44,7 +45,7 @@ public class CharacterStat : MonoBehaviour
 
     void Start()
     {
-        animations = gameObject.GetComponent<Animation>();
+        animations = characterMortor.GetComponent<Animation>();
         Pdv = MaxPdv;
         healthBar.SetMaxHealth(MaxPdv);
         characterStat = gameObject.GetComponent<CharacterStat>();

@@ -16,7 +16,7 @@ public class CharacterMotor : MonoBehaviour
     
     CapsuleCollider PlayerCollider; // on recupere la boite de collision du player
     public GameObject RayHit;           // raycast pour savoir si le joeur touche un ennemie avec une attack
-    public CharacterMotor characterMortor;
+    public GameObject characterMortor;
     public bool isdead;
     public Camera followCamera;
 
@@ -25,7 +25,7 @@ public class CharacterMotor : MonoBehaviour
 
     void Awake()
     {
-        animations = gameObject.GetComponent<Animation>();
+        animations = characterMortor.GetComponent<Animation>();
 
         m_Rb = GetComponent<Rigidbody>();
         m_CameraPos = followCamera.transform.position - transform.position;
@@ -34,13 +34,13 @@ public class CharacterMotor : MonoBehaviour
     void Start() // on récupere les différents valeurs qu'il nous faut 
     {
 
-        animations = gameObject.GetComponent<Animation>();
+        animations = characterMortor.GetComponent<Animation>();
 
-        PlayerCollider = gameObject.GetComponent<CapsuleCollider>();
-
-        characterMortor = gameObject.GetComponent<CharacterMotor>();
+        PlayerCollider = characterMortor.GetComponent<CapsuleCollider>();
 
         RayHit = GameObject.Find("RayHit");
+
+        animations["Roll"].speed = 1f;
 
     }
     void FixedUpdate()
@@ -49,31 +49,55 @@ public class CharacterMotor : MonoBehaviour
 
         if (!isdead)
         {
-            if ((Input.GetKey("w") || Input.GetKey("a") || Input.GetKey("s") || Input.GetKey("d")) && !animations.IsPlaying("attack"))
+            if (animations.IsPlaying("Roll"))
             {
-                animations.Play("run");
+
+                float horizontalInput = Input.GetAxis("Horizontal");
+                float verticalInput = Input.GetAxis("Vertical");
+                Vector3 movement = new Vector3(horizontalInput, 0, verticalInput).normalized;
+                Quaternion targetRotation = Quaternion.LookRotation(movement);
+                targetRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.fixedDeltaTime);
+
+                m_Rb.MovePosition(m_Rb.position + movement * 20 * Time.fixedDeltaTime);
+                m_Rb.MoveRotation(targetRotation);
+            }
+            if ((Input.GetKey("w") || Input.GetKey("a") || Input.GetKey("s") || Input.GetKey("d")) && !animations.IsPlaying("attack")&& !animations.IsPlaying("Roll"))
+            {
                 float horizontalInput = Input.GetAxis("Horizontal");
                 float verticalInput = Input.GetAxis("Vertical");
 
                 Vector3 movement = new Vector3(horizontalInput, 0, verticalInput).normalized;
 
-                if (movement == Vector3.zero)
+                if (Input.GetKeyDown("e") && !animations.IsPlaying("attack") && !animations.IsPlaying("Roll"))
                 {
-                    return;
+                    animations.Play("Roll");
+
                 }
+                else
+                {
 
-                Quaternion targetRotation = Quaternion.LookRotation(movement);
 
-                Debug.Log(targetRotation.eulerAngles);
+                    animations.Play("run");
 
-                targetRotation = Quaternion.RotateTowards(transform.rotation,targetRotation,360 * Time.fixedDeltaTime);
+                    if (movement == Vector3.zero)
+                    {
+                        return;
+                    }
 
-                m_Rb.MovePosition(m_Rb.position + movement * walkSpeed * Time.fixedDeltaTime);
-                m_Rb.MoveRotation(targetRotation);
+                    Quaternion targetRotation = Quaternion.LookRotation(movement);
+
+                    Debug.Log(targetRotation.eulerAngles);
+
+                    targetRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 360 * Time.fixedDeltaTime);
+
+                    m_Rb.MovePosition(m_Rb.position + movement * walkSpeed * Time.fixedDeltaTime);
+                    m_Rb.MoveRotation(targetRotation);
+
+                }
             }
             else
             {
-                if (!animations.IsPlaying("attack"))
+                if (!animations.IsPlaying("attack")&& !animations.IsPlaying("Roll"))
                 {
                     animations.Play("idle");
 
@@ -82,7 +106,7 @@ public class CharacterMotor : MonoBehaviour
 
 
             // attacker 
-            if (Input.GetMouseButtonDown(0) && !animations.IsPlaying("attack"))
+            if (Input.GetMouseButtonDown(0) && !animations.IsPlaying("attack")&& !animations.IsPlaying("Roll"))
             {
                 animations.Play("attack");
                 RaycastHit hit;
@@ -98,11 +122,9 @@ public class CharacterMotor : MonoBehaviour
                 }
             }
         }
- 
     }
     private void LateUpdate()
     {
         followCamera.transform.position = m_Rb.position + m_CameraPos;
     }
-
 }
